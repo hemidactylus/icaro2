@@ -29,7 +29,7 @@ e.g. N=3,M=2. Init:
 |_ _ _|,
 ```
 
-might become (i.e. +2:
+might become (i.e. +2 add steps):
 
 ```
  _ _ _ ,
@@ -37,7 +37,7 @@ might become (i.e. +2:
 |_|_ _|,
 ```
 
-it seems (N-1) * (M-1) must be attached.
+(N-1) * (M-1) walls must be attached.
 
 candidate wall positions are:
 
@@ -45,3 +45,4 @@ candidate wall positions are:
 - `_` for all (y = 1...M-1 and x = 0...N-1)
 
  
+Weighted selection to make mazes more interesting through exponentials.

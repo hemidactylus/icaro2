@@ -4,9 +4,11 @@ from functools import lru_cache
 
 N = 24
 M = 18
-lmb = 0.2
-lmb2 = 0.6
-lmb3 = 2.5
+STRATEGY = {
+    "PeripheryPenalty": 0.2,
+    "StraightLinePenalty": 0.6,
+    "onBorderPenalty": 2.5,
+}
 
 def zero(n,m):
     return [
@@ -92,14 +94,19 @@ def wpos_eligibility(pos, l):
 
 
 @lru_cache
-def wall_weight(i, j, n, m, lmb, z, wcounts):
-    # prefer central (lmb)
-    # prefer corners over straight long segments (lmb2)
-    # prefer walls not starting off boundaries (lmb3)
+def wall_weight(wpos, wcounts, n, m):
+    i, j, z = wpos
+    # prefer central (PeripheryPenalty)
+    # prefer corners over straight long segments (StraightLinePenalty)
+    # prefer walls not starting off boundaries (onBorderPenalty)
     isborder = 1 if i==0 or j==0 or i==n-1 or j==m-1 else 0
     hn= 0.5 * n
     hm= 0.5 * m
-    return math.exp(-lmb*(math.fabs(i-hn) + math.fabs(j-hm)) -lmb2*(wcounts[z]-wcounts[1-z]) - lmb3*isborder)
+    return math.exp(
+        -STRATEGY["PeripheryPenalty"]*(math.fabs(i-hn) + math.fabs(j-hm))
+        -STRATEGY["StraightLinePenalty"]*(wcounts[z]-wcounts[1-z])
+        -STRATEGY["onBorderPenalty"]*isborder
+    )
 
 def choose_rich_wpos(cand_rich_wposs, l):
     n=len(l) - 1
@@ -107,13 +114,10 @@ def choose_rich_wpos(cand_rich_wposs, l):
 
     weights = [
         wall_weight(
-            r_wpos["wpos"][0],
-            r_wpos["wpos"][1],
+            r_wpos["wpos"],
+            r_wpos["eligibility"]["wcounts"],
             n,
             m,
-            lmb,
-            r_wpos["wpos"][2],
-            r_wpos["eligibility"]["wcounts"],
         )
         for r_wpos in cand_rich_wposs
     ]
