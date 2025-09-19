@@ -1,5 +1,6 @@
 import math
 import random
+import time
 from functools import lru_cache
 
 N = 24
@@ -150,17 +151,11 @@ def add_one(l):
     return True
 
 if __name__ == "__main__":
-    labi = init(N,M)
-    # draw(labi)
-    saturate(labi)
-    # draw(labi)
+    # random.seed(123)
+    random.seed(int((time.time() % 1) * 1000))
 
     labi = init(N,M)
-    for w in range((N-1) * (M-1) + 1):
-        # print("ITE", w)
-        # draw(labi)
-        if not add_one(labi):
-            # print("Exiting")
-            break
+    for w in range((N-1) * (M-1)):
+        add_one(labi)
 
     draw(labi)
