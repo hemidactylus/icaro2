@@ -75,24 +75,31 @@ def wpos_eligibility(pos, l):
     i,j,z=pos
     # must be empty
     if l[i][j][z] == 1:
-        return False, (0,0)
+        return {"eligible": False, "wcounts": (0,0)}
     # one end must bear wall, the other no
     end0 = (i, j)
     end1 = (i + (1 - z), j + z)
     ws0 = survey_walls(*end0, l)
     ws1 = survey_walls(*end1, l)
-    return (ws0[0]+ws0[1] > 0) ^ (ws1[0]+ws1[1] > 0), (ws0[0]+ws1[0], ws0[1]+ws1[1])
+    return {
+        "eligible": (ws0[0]+ws0[1] > 0) ^ (ws1[0]+ws1[1] > 0),
+        "wcounts": (
+            # count of incident walls, horiz/vert
+            ws0[0]+ws1[0],
+            ws0[1]+ws1[1],
+        ),
+    }
 
 
 @lru_cache
-def wall_weight(i, j, n, m, lmb, z, wshs):
+def wall_weight(i, j, n, m, lmb, z, wcounts):
     # prefer central (lmb)
     # prefer corners over straight long segments (lmb2)
     # prefer walls not starting off boundaries (lmb3)
     isborder = 1 if i==0 or j==0 or i==n-1 or j==m-1 else 0
     hn= 0.5 * n
     hm= 0.5 * m
-    return math.exp(-lmb*(math.fabs(i-hn) + math.fabs(j-hm)) -lmb2*(wshs[z]-wshs[1-z]) - lmb3*isborder)
+    return math.exp(-lmb*(math.fabs(i-hn) + math.fabs(j-hm)) -lmb2*(wcounts[z]-wcounts[1-z]) - lmb3*isborder)
 
 def choose_rich_wpos(cand_rich_wposs, l):
     n=len(l) - 1
@@ -106,7 +113,7 @@ def choose_rich_wpos(cand_rich_wposs, l):
             m,
             lmb,
             r_wpos["wpos"][2],
-            r_wpos["eligibility"][1],
+            r_wpos["eligibility"]["wcounts"],
         )
         for r_wpos in cand_rich_wposs
     ]
@@ -128,7 +135,7 @@ def add_one(l):
     candidate_rich_wposs = [
         {"wpos": cand_wpos, "eligibility": eligibility}
         for cand_wpos in candidate_wposs(n,m)
-        if (eligibility := wpos_eligibility(cand_wpos, l))[0]
+        if (eligibility := wpos_eligibility(cand_wpos, l))["eligible"]
     ]
     if candidate_rich_wposs == []:
         return False
