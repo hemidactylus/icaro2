@@ -4,9 +4,10 @@ Maze generator.
 
 ## Quickstart
 
-```pip install -r requirements.txt
+```
+$> pip install -r requirements.txt
 
-python icaro2.py
+$> python icaro2.py
  _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _  
 |       | |   | | | |   | |_      |       | |  _| 
 | |_| |_  | |_|_     _|_|  _|_|_| |_|_|_| |_ _  | 
