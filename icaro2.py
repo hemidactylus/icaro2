@@ -46,7 +46,7 @@ def draw(l):
         print("\n", end="")
 
 
-def candidate_pos(n,m):
+def candidate_wposs(n,m):
     for j in range(m):
         for i in range(1, n):
             yield (i,j,1)
@@ -58,7 +58,7 @@ def candidate_pos(n,m):
 def saturate(l):
     n=len(l) - 1
     m=len(l[0]) - 1
-    for i,j,z in candidate_pos(n,m):
+    for i,j,z in candidate_wposs(n,m):
         assert l[i][j][z]==0
         l[i][j][z] = 1
 
@@ -70,7 +70,7 @@ def survey_walls(i, j, l):
     return (hs, vs)
 
 
-def eligible_wall_pos(pos, l):
+def wpos_eligibility(pos, l):
     # return bool, (edge counts h/v)
     i,j,z=pos
     # must be empty
@@ -94,13 +94,21 @@ def wall_weight(i, j, n, m, lmb, z, wshs):
     hm= 0.5 * m
     return math.exp(-lmb*(math.fabs(i-hn) + math.fabs(j-hm)) -lmb2*(wshs[z]-wshs[1-z]) - lmb3*isborder)
 
-def choose_wall(cand_walls, l):
+def choose_rich_wpos(cand_rich_wposs, l):
     n=len(l) - 1
     m=len(l[0]) - 1
 
     weights = [
-        wall_weight(i, j, n, m, lmb, z, wshs)
-        for (i, j, z), (elib, wshs) in cand_walls
+        wall_weight(
+            r_wpos["wpos"][0],
+            r_wpos["wpos"][1],
+            n,
+            m,
+            lmb,
+            r_wpos["wpos"][2],
+            r_wpos["eligibility"][1],
+        )
+        for r_wpos in cand_rich_wposs
     ]
     cumw = [
         sum(weights[0:p+1])
@@ -108,8 +116,8 @@ def choose_wall(cand_walls, l):
     ]
     rnd = random.random() * cumw[-1]
     return [
-        cwall
-        for cwall, cumw in zip(cand_walls, cumw)
+        r_wpos
+        for r_wpos, cumw in zip(cand_rich_wposs, cumw)
         if cumw > rnd
     ][0]
 
@@ -117,16 +125,16 @@ def choose_wall(cand_walls, l):
 def add_one(l):
     n=len(l) - 1
     m=len(l[0]) - 1
-    cand_wallpos = [
-        (cand_pos, eli)
-        for cand_pos in candidate_pos(n,m)
-        if (eli := eligible_wall_pos(cand_pos, l))[0]
+    candidate_rich_wposs = [
+        {"wpos": cand_wpos, "eligibility": eligibility}
+        for cand_wpos in candidate_wposs(n,m)
+        if (eligibility := wpos_eligibility(cand_wpos, l))[0]
     ]
-    if cand_wallpos == []:
+    if candidate_rich_wposs == []:
         return False
 
-    wall_pos = choose_wall(cand_wallpos, l)
-    i,j,z=wall_pos[0]
+    chosen_r_wpos = choose_rich_wpos(candidate_rich_wposs, l)
+    i,j,z=chosen_r_wpos["wpos"]
     l[i][j][z]=1
     return True
 
