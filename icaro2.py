@@ -2,9 +2,14 @@ import math
 import random
 import time
 from functools import lru_cache
+import argparse
 
-N = 24
-M = 18
+parser = argparse.ArgumentParser()
+parser.add_argument("-x", help="width")
+parser.add_argument("-y", help="height")
+parser.add_argument("-s", help="seed")
+
+
 STRATEGY = {
     "PeripheryPenalty": 0.2,
     "StraightLinePenalty": 0.6,
@@ -151,8 +156,12 @@ def add_one(l):
     return True
 
 if __name__ == "__main__":
-    # random.seed(123)
-    random.seed(int((time.time() % 1) * 1000))
+    args = parser.parse_args()
+    N = int(args.x) or 16
+    M = int(args.y) or 12
+    S = args.s or int((time.time() % 1) * 1000)
+
+    random.seed(S)
 
     labi = init(N,M)
     for w in range((N-1) * (M-1)):
