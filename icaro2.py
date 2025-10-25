@@ -4,10 +4,14 @@ import time
 from functools import lru_cache
 import argparse
 
+from svglib import render_svg
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-x", help="width")
 parser.add_argument("-y", help="height")
 parser.add_argument("-s", help="seed")
+parser.add_argument("-o", help="output SVG filename", action="store")
 
 
 STRATEGY = {
@@ -38,20 +42,23 @@ def init(n,m):
     return z
 
 
-def draw(l):
+def render_ascii(l):
+    buffer = ""
     n=len(l) - 1
     m=len(l[0]) - 1
     for j in range(m,-1,-1):
         for i in range(n + 1):
             if l[i][j][1]:
-                print("|", end="")
+                buffer += ("|")
             else:
-                print(" ", end="")
+                buffer += (" ")
             if l[i][j][0]:
-                print("_", end="")
+                buffer += ("_")
             else:
-                print(" ", end="")
-        print("\n", end="")
+                buffer += (" ")
+        if j > 0:
+            buffer += ("\n")
+    return buffer
 
 
 def candidate_wposs(n,m):
@@ -167,4 +174,12 @@ if __name__ == "__main__":
     for w in range((N-1) * (M-1)):
         add_one(labi)
 
-    draw(labi)
+    if args.o:
+        s = render_svg(labi)
+        ofname = args.o
+        if ofname.lower()[-4:] != ".svg":
+            ofname = ofname + ".svg"
+        s.save_svg(ofname)
+    else:
+        labi_ascii = render_ascii(labi)
+        print(labi_ascii)
