@@ -175,7 +175,13 @@ if __name__ == "__main__":
         add_one(labi)
 
     if args.o:
-        s = render_svg(labi)
+        #
+        glyphs = [
+            ("glyphs/1F577.svg", 0, M-1),
+            ("glyphs/1F578.svg", N-1, 0),
+        ]
+        #
+        s = render_svg(labi, glyphs)
         ofname = args.o
         if ofname.lower()[-4:] != ".svg":
             ofname = ofname + ".svg"

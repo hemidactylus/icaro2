@@ -1,11 +1,17 @@
 import drawsvg as draw
 
 DOTS_PER_CELL = 30
+DOTS_PER_GLYPH = 24
 SEGMENT_WIDTH = 4
 BORDER_WIDTH = 10
 GUTTER = 5  # half of border width for neat bordering
 
-def render_svg(l):
+GLYPH_GUTTER = 0.5 * (DOTS_PER_CELL - DOTS_PER_GLYPH)
+
+def render_svg(
+    l,
+    glyphs = [],
+):
     n=len(l) - 1
     m=len(l[0]) - 1
     w = n * DOTS_PER_CELL
@@ -45,5 +51,19 @@ def render_svg(l):
                     stroke_linecap="round",
                     stroke_width=SEGMENT_WIDTH,
                 ))
+
+    # glyphs if requested
+    for glpic, glx, gly in glyphs:
+        # cell origin
+        glposx = glx * DOTS_PER_CELL + GUTTER
+        glposy = GUTTER + h - (gly + 1) * DOTS_PER_CELL
+        d.append(draw.Image(
+            glposx + GLYPH_GUTTER,
+            glposy + GLYPH_GUTTER,
+            DOTS_PER_GLYPH,
+            DOTS_PER_GLYPH,
+            glpic,
+            embed=True,
+        ))
 
     return d
