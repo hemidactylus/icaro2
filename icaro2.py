@@ -164,8 +164,8 @@ def add_one(l):
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    N = int(args.x) or 16
-    M = int(args.y) or 12
+    N = int(args.x or 16)
+    M = int(args.y or 12)
     S = args.s or int((time.time() % 1) * 1000)
 
     random.seed(S)
