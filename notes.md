@@ -44,9 +44,9 @@ The maze is a fixed-size NxMx2 (modulo offsets) array, where
 
 deadcells, size, forced-impositions --> imposed
 
-fullgrid, imposed --> candidates
+size, imposed --> candidates
 
-fullgrid, imposed , candidates --> maze
+size, imposed, candidates --> maze
 
 For all candidate lines: calculate is_growable; refresh list of growables
 
@@ -97,3 +97,8 @@ expected impositions (walls; wites are `.` and `'`):
 |  _  |.' 
 |_|_ _|.' 
 ```
+
+# Status:
+
+candidates as a temporary set of linepos.
+Next step: candidates as a map with candidate state computed properly, and corresponding display.
