@@ -5,7 +5,7 @@ LinePos = tuple[int, int, int]
 IMP_WHITE = 0
 IMP_WALL = 1
 
-def calc_impositions(n: int, m: int, dcells: set[CellType]) -> dict[LinePos, LineState]:
+def calc_impositions(n: int, m: int, dcells: set[CellType], dimps: dict[LinePos, int]) -> dict[LinePos, LineState]:
     imposed: dict[LinePos, LineState] = {}
     for x in range(n+1):
         for y in range(m+1):
@@ -38,6 +38,9 @@ def calc_impositions(n: int, m: int, dcells: set[CellType]) -> dict[LinePos, Lin
                     elif is_dead:
                         # within the dead zone entirely
                         imposed[hl] = IMP_WHITE
+    # direct impositions if any
+    for line, imposed_state in dimps.items():
+        imposed[line] = IMP_WALL if imposed_state else IMP_WHITE
     return imposed
 
 
@@ -75,6 +78,7 @@ if __name__ == "__main__":
     N = 4
     M = 5
     dead_cells: set[CellType] = {(0,2), (0,3), (1,3), (0,4), (3,0), (3,1)}
-    impositions = calc_impositions(N,M,dead_cells)
+    direct_impositions: dict[LinePos, int] = {(1,0,1): 1, (1,1,0): 1, (3,3,0): 0}
+    impositions = calc_impositions(N,M,dead_cells, direct_impositions)
     imp_repr = maze_display(N, M, impositions)
     print(imp_repr)

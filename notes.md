@@ -5,7 +5,7 @@ Maze is contained within a `(N,M)` grid ("size").
 "Line" is a `(x,y,t)` triple (a `LinePos`) with t = 0 for horizontal, 1 for vertical (growbound from corner).
 A line can be made either 'wall' or 'white'.
 
-TODO boundaries, fictitious layer
+A fictitious layer on the top and right, used only for horiz-lines and vert-lines resp., is added.
 
 ## Imposition
 
@@ -18,7 +18,7 @@ Dead cells induce imposed:
 - whites, between dead and dead
 - whites, between dead and boundary
 
-There may be (white/wall) impositions as direct requests on top of it.
+There may be (white/wall) impositions as direct requests on top of it. These act as overrides.
 
 impositions is a map `LinePos -> line state (int)`
 
@@ -81,13 +81,19 @@ That is:
 {(0,2), (0,3), (1,3), (0,4), (3,0), (3,1)}
 ```
 
+Additional direct-imposed walls(1)/whites(0):
+
+```
+{(1,0,1): 1, (1,1,0): 1, (3,3,0): 0}
+```
+
 expected impositions (walls; wites are `.` and `'`):
 
 ```
  . _ _ _  
 '.|_    | 
-'.'_|   | 
+'.'_|  .| 
 '_|    _| 
-|     |.' 
-|_ _ _|.' 
+|  _  |.' 
+|_|_ _|.' 
 ```
