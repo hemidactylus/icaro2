@@ -1,48 +1,93 @@
-# Icaro 2
+# Icaro 2 - reboot
 
-cells are [x,y] and each has |_  _=0, |=1
+Maze is contained within a `(N,M)` grid ("size").
 
-origin is lower left, so (note a fictitious layer):
+"Line" is a `(x,y,t)` triple (a `LinePos`) with t = 0 for horizontal, 1 for vertical (growbound from corner).
+A line can be made either 'wall' or 'white'.
+
+TODO boundaries, fictitious layer
+
+## Imposition
+
+Dead cells are `(x,y)`, a set.
+
+Dead cells induce imposed:
+
+- walls, between dead and alive
+- walls, between alive and boundary
+- whites, between dead and dead
+- whites, between dead and boundary
+
+There may be (white/wall) impositions as direct requests on top of it.
+
+impositions is a map `LinePos -> line state (int)`
+
+## Candidates
+
+All lines that could be walls (i.e. not imposed) are 'candidates'.
+
+A map `(x,y,t) -> CandidateState`
+
+CandidateState has attributes:
+- growable (bool)
+- weight (float) <-- depends on strategy
+
+## Maze
+
+The maze is a fixed-size NxMx2 (modulo offsets) array, where
+- <= 0 means white (-1 if imposed, 0 if from candidate)
+- nonzero means wall (1 = imposed, 2 = from candidate)
+
+## Flow
+
+### Init
+
+deadcells, size, forced-impositions --> imposed
+
+fullgrid, imposed --> candidates
+
+fullgrid, imposed , candidates --> maze
+
+For all candidate lines: calculate is_growable; refresh list of growables
+
+### Update
+
+While list of growables is ! []:
+
+- pick one line (use weights from strategy)
+- turn on wall: (a) on maze, (b) mark ungrowable, (c) recalc growable of up to 6 neighbours
+
+### Growable
+
+A line is growable if (it is candidate, AND) it is not a wall AND exactly one of the two ends is touching at least one wall. (must retain all info on the walls for the weight strategy: number, orientation)
+
+## Testing setup
+
+N, M = 4, 5
+
+Dead cells:
 
 ```
-[*0,M]                          [*N,M]
-[0,M-1]               [N-1,M-1]
-...
-[0.2]
-[0,1]
-[0,0] [1,0] [2,0] ... [N-1,0]   [*N,0]
+Xooo
+XXoo
+Xooo
+oooX
+oooX
 ```
 
-Init for NxM is:
-
-- has `|` iff (x==0 or x==N) and y < M
-- has `_` iff (y==0 or y==M) and x < N
-
-Total walls to build are:
-
-
-e.g. N=3,M=2. Init:
+That is:
 
 ```
- _ _ _ ,
-|. . .|,
-|_ _ _|,
+{(0,2), (0,3), (1,3), (0,4), (3,0), (3,1)}
 ```
 
-might become (i.e. +2 add steps):
+expected impositions (walls; wites are `.` and `'`):
 
 ```
- _ _ _ ,
-|. .|.|,
-|_|_ _|,
+ . _ _ _  
+'.|_    | 
+'.'_|   | 
+'_|    _| 
+|     |.' 
+|_ _ _|.' 
 ```
-
-(N-1) * (M-1) walls must be attached.
-
-candidate wall positions are:
-
-- `|` for all (x = 1...N-1 and y = 0...M-1)
-- `_` for all (y = 1...M-1 and x = 0...N-1)
-
- 
-Weighted selection to make mazes more interesting through exponentials.
